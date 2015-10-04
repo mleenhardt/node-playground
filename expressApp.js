@@ -1,7 +1,7 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
+var log4js = require("log4js");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
@@ -16,7 +16,7 @@ expressApp.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //expressApp.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-expressApp.use(logger('dev'));
+expressApp.use(log4js.connectLogger(log4js.getLogger("[express]"), { level: "auto" }));
 expressApp.use(bodyParser.json());
 expressApp.use(bodyParser.urlencoded({extended: false}));
 expressApp.use(cookieParser());
