@@ -20,7 +20,7 @@ expressApp.use(log4js.connectLogger(log4js.getLogger("[express]"), { level: "aut
 expressApp.use(bodyParser.json());
 expressApp.use(bodyParser.urlencoded({extended: false}));
 expressApp.use(cookieParser());
-expressApp.use(require('less-middleware')(path.join(__dirname, 'public')));
+//expressApp.use(require('less-middleware')(path.join(__dirname, 'public')));
 expressApp.use(express.static(path.join(__dirname, 'public')));
 
 expressApp.use('/', routes);
