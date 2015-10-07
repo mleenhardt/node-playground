@@ -9,5 +9,5 @@ var httpServer = require("http").createServer(express);
 var webSocket = require("./lib/webSocket").startServer(httpServer);
 
 httpServer.listen(port, function() {
-    logger.info( "Http server listening on port" + port);
+    logger.info( "Http server listening on port " + port);
 });
