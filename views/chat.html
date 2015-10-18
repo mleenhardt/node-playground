@@ -17,27 +17,77 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
         $(function () {
-            var socket = io.connect('http://192.168.0.14:3000');
             var $messageList = $("#messageList");
             var $messageFrm = $("#messageFrm");
             var $typeInput = $("#typeInput");
-            var chatMessageEvent = "chat.message";
 
-            $messageFrm.submit(function() {
-                var message = $typeInput.val();
-                if (message.trim()) {
-                    socket.emit(chatMessageEvent, message);
-                    $typeInput.val("");
-                }
-                return false;
-            });
+            const socketEvents = {
+                connect: "connect",
+                error: "error",
+                clientJoin : "client.join",
+                welcome: "welcome",
+                chatMessage: "chat.message",
+                clientLeft: "client.left"
+            };
 
-            socket.on(chatMessageEvent, function(message) {
-
+            function displayMessage(message) {
                 var timestamp = "[" + new Date().toLocaleString() + "] ";
-
                 $messageList.append($("<li/>").text(timestamp + message));
-            });
+            }
+
+            function connect() {
+                var name = "";
+                while (!/\S/.test(name)) {
+                    name = window.prompt("Chose a name");
+                }
+
+                var socket = io.connect("http://192.168.0.14:3000", {forceNew: true, query: "name=" + name});
+
+                socket.on(socketEvents.connect, function() {
+                    displayMessage("Connected")
+                });
+
+                socket.on(socketEvents.error, function(data) {
+                    displayMessage("Connection error: " + data)
+                    connect();
+                });
+
+                var sessionId;
+                socket.on(socketEvents.welcome, function(socketId) {
+                     sessionId = socketId;
+                });
+
+                socket.on(socketEvents.clientJoin, function(clientName) {
+                    var message = clientName + " joined the conversation."
+                    displayMessage(message);
+                });
+
+                socket.on(socketEvents.chatMessage, function(data) {
+                    displayMessage(data.name + ": " + data.message);
+                });
+
+                socket.on(socketEvents.clientLeft, function(clientName) {
+                    var message = clientName + " left the conversation."
+                    displayMessage(message);
+                });
+
+                $messageFrm.off();
+                $messageFrm.submit(function() {
+                    var message = $typeInput.val().trim();
+                    if (message) {
+                        socket.emit(socketEvents.chatMessage, {
+                            sessionId: sessionId,
+                            message: message
+                        });
+                        $typeInput.val("");
+                    }
+                    return false;
+                });
+
+                $typeInput.focus();
+            }
+
+            connect();
         });
     </script>
 </head>
